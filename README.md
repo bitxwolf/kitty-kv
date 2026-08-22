@@ -116,13 +116,16 @@ Value tokens are quantized per-token across the head dimension $D$, as outlier d
 
 ## 🚀 Performance Results
 
-Hardware benchmark results on NVIDIA RTX 5050 (simulated constraints):
+Hardware benchmark results on NVIDIA RTX 5050 (`cuda:0`, 32L, 8H, D=128, 32K Context):
 
-| Metric | FP16 Baseline | Kitty (2-bit/4-bit) | Improvement |
-|--------|---------------|---------------------|-------------|
-| **VRAM Usage** (32L, 8H, 32K Context) | 4096.0 MB | **55.1 MB** | **~74× Compression** 🤯 |
-| **Decode Throughput** | ~10 tok/sec | **21.3 tok/sec** | **2.1× Speedup** |
-| **Quantization Latency** (Fallback) | - | ~19.5 ms/page | Negligible overhead |
+| Metric | Measurement | Notes |
+|--------|-------------|-------|
+| **FP16 KV Cache (Baseline)** | 4096.0 MB | Full 32K context memory requirement |
+| **Kitty Total Memory** | **55.1 MB** | 19.1 MB (Quant Pool) + 36.0 MB (FP16 Buffers) |
+| **Compression Ratio** | **74.37×** | Massive VRAM savings 🤯 |
+| **Decode Throughput** | **18.4 tokens/sec** | Single layer, 500 steps (54.2 ms/token) |
+| **Key Quantisation Latency** | ~10.57 ms/page | PyTorch fallback path |
+| **Key Dequantisation Latency** | ~5.77 ms/page | PyTorch fallback path |
 
 > *Note: Compression ratio scales with sequence length. The 74x ratio reflects the deep efficiency of the layout manager allocating memory only as needed, compared to static FP16 pre-allocation.*
 
